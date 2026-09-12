@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,9 +29,19 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'login' => ['sometimes', 'string'],
+            'username' => ['sometimes', 'string'],
+            'email' => ['sometimes', 'string'],
             'password' => ['required', 'string'],
         ];
+    }
+
+    /**
+     * Get the login identifier provided by the user.
+     */
+    public function loginIdentifier(): string
+    {
+        return (string) ($this->input('login') ?? $this->input('username') ?? $this->input('email'));
     }
 
     /**
@@ -42,12 +53,41 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        $identifier = $this->loginIdentifier();
+        $password = (string) $this->input('password');
+        $remember = $this->boolean('remember');
 
-            throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
-            ]);
+        // Check if identifier is an email, username, nis, or nip
+        $field = 'username';
+        if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+            $field = 'email';
+        } elseif (is_numeric($identifier)) {
+            // Check if matches NIS or NIP
+            if (User::where('nis', $identifier)->exists()) {
+                $field = 'nis';
+            } elseif (User::where('nip', $identifier)->exists()) {
+                $field = 'nip';
+            }
+        }
+
+        if (! Auth::attempt([$field => $identifier, 'password' => $password], $remember)) {
+            // Also try email or username as fallback if field wasn't email
+            $authenticated = false;
+            if ($field !== 'email' && Auth::attempt(['email' => $identifier, 'password' => $password], $remember)) {
+                $authenticated = true;
+            } elseif ($field !== 'username' && Auth::attempt(['username' => $identifier, 'password' => $password], $remember)) {
+                $authenticated = true;
+            }
+
+            if (! $authenticated) {
+                RateLimiter::hit($this->throttleKey());
+
+                throw ValidationException::withMessages([
+                    'login' => trans('auth.failed'),
+                    'username' => trans('auth.failed'),
+                    'email' => trans('auth.failed'),
+                ]);
+            }
         }
 
         RateLimiter::clear($this->throttleKey());
@@ -69,7 +109,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'login' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -81,6 +121,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->loginIdentifier()).'|'.$this->ip());
     }
 }

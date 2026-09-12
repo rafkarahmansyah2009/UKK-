@@ -15,8 +15,19 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('username')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('role')->default('member'); // admin, member
+            $table->string('member_type')->nullable(); // siswa, guru
+            $table->string('nis')->unique()->nullable();
+            $table->string('nip')->unique()->nullable();
+            $table->string('class')->nullable(); // kelas, e.g. XI RPL 1
+            $table->string('major')->nullable(); // jurusan, e.g. RPL, TKJ
+            $table->string('subject')->nullable(); // mata pelajaran (guru)
+            $table->string('phone')->nullable();
+            $table->text('avatar')->nullable();
+            $table->string('status')->default('active'); // active, inactive
             $table->rememberToken();
             $table->timestamps();
         });
