@@ -50,6 +50,9 @@ class BookCatalogController extends Controller
             ->whereIn('status', ['borrowed', 'overdue'])
             ->exists();
 
-        return view('member.books.show', compact('book', 'hasActiveBorrowing'));
+        $activeCount = $user->borrowings()->whereIn('status', ['borrowed', 'overdue'])->count();
+        $canBorrow = $user->isActive() && $activeCount < 3;
+
+        return view('member.books.show', compact('book', 'hasActiveBorrowing', 'canBorrow'));
     }
 }

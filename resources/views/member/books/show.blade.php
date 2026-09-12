@@ -56,7 +56,7 @@
                                 <p class="text-xs font-bold text-error">Stok Buku Sedang Kosong</p>
                                 <p class="text-[11px] text-on-surface-variant mt-1">Silakan cek kembali beberapa hari lagi.</p>
                             </div>
-                        @elseif (! $canBorrow)
+                        @elseif (! ($canBorrow ?? true))
                             <div class="p-3 bg-error-container/20 border border-error/30 rounded-xl text-center">
                                 <p class="text-xs font-bold text-error">Batas Peminjaman Tercapai</p>
                                 <p class="text-[11px] text-on-surface-variant mt-1">Anda sudah mencapai batas maksimal 3 buku pinjaman aktif.</p>

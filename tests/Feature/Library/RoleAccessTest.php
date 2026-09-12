@@ -45,6 +45,11 @@ test('member can access member dashboard and catalog', function () {
 
     $catalogResponse = $this->actingAs($member)->get(route('member.books.index'));
     $catalogResponse->assertOk();
+
+    $category = Category::factory()->create();
+    $book = Book::factory()->create(['category_id' => $category->id]);
+    $showResponse = $this->actingAs($member)->get(route('member.books.show', $book));
+    $showResponse->assertOk();
 });
 
 test('dashboard route redirects user according to role', function () {
