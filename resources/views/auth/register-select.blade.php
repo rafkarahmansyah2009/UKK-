@@ -7,58 +7,85 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-surface antialiased font-body-md text-on-surface">
-    <main class="min-h-screen flex items-center justify-center p-4 sm:p-8">
-        <div class="flex flex-col w-full max-w-4xl mx-auto">
-            <div class="bg-surface-container-lowest rounded-2xl shadow-xl p-8 sm:p-12 border border-outline-variant/40 text-center">
-                <!-- Branding Header -->
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-container rounded-2xl shadow-md text-tertiary-fixed mb-4">
-                    <span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">menu_book</span>
-                </div>
-                <h1 class="font-display-lg text-display-lg text-primary font-bold mb-2">Pendaftaran Anggota</h1>
-                <p class="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto mb-10">
-                    Pilih kategori keanggotaan Anda di SMKN 5 untuk melanjutkan proses pendaftaran.
-                </p>
+    <main class="min-h-screen flex items-center justify-center p-8">
+        <div class="flex flex-col w-full h-full min-h-[calc(100vh-4rem)]">
+            <div class="flex-1 flex w-full max-w-container-max mx-auto bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden relative">
+                <!-- Left Panel -->
+                <div class="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-12 overflow-hidden bg-primary-container text-on-primary-container">
+                    <!-- Background Image -->
+                    <div class="absolute inset-0 bg-cover bg-center z-0 mix-blend-overlay opacity-40" style="background-image: url('{{ asset('images/library/screen.png') }}');"></div>
+                    <!-- Scrim -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary-container via-primary-container/80 to-transparent z-10"></div>
 
-                <!-- Choice Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mb-10">
-                    <!-- Option Siswa -->
-                    <a href="{{ route('register.siswa') }}" class="group flex flex-col items-center p-8 bg-surface-container-lowest hover:bg-surface-container-low/60 rounded-xl border-2 border-outline-variant hover:border-secondary transition-all shadow-sm hover:shadow-md text-left">
-                        <div class="w-16 h-16 rounded-full bg-secondary-container/15 flex items-center justify-center text-secondary mb-4 group-hover:scale-110 transition-transform">
-                            <span class="material-symbols-outlined text-3xl">school</span>
+                    <div class="relative z-20 flex flex-col items-start gap-4">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-4xl text-tertiary-fixed" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+                            <span class="font-display-lg text-display-lg text-on-primary">Library SMKN 5</span>
                         </div>
-                        <h2 class="font-title-sm text-title-sm font-bold text-on-surface mb-2">Daftar sebagai Siswa</h2>
-                        <p class="font-body-sm text-body-sm text-on-surface-variant text-center">
-                            Khusus bagi peserta didik aktif SMKN 5. Wajib menyertakan Nomor Induk Siswa (NIS), kelas, dan jurusan.
-                        </p>
-                        <span class="mt-6 inline-flex items-center gap-2 font-label-caps text-label-caps font-bold text-secondary uppercase tracking-wider group-hover:translate-x-1 transition-transform">
-                            Pilih Pendaftaran Siswa
-                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-                        </span>
-                    </a>
+                        <div class="h-1 w-12 bg-tertiary-fixed rounded-full"></div>
+                    </div>
 
-                    <!-- Option Guru -->
-                    <a href="{{ route('register.guru') }}" class="group flex flex-col items-center p-8 bg-surface-container-lowest hover:bg-surface-container-low/60 rounded-xl border-2 border-outline-variant hover:border-primary-container transition-all shadow-sm hover:shadow-md text-left">
-                        <div class="w-16 h-16 rounded-full bg-primary-container/15 flex items-center justify-center text-primary-container mb-4 group-hover:scale-110 transition-transform">
-                            <span class="material-symbols-outlined text-3xl">co_present</span>
-                        </div>
-                        <h2 class="font-title-sm text-title-sm font-bold text-on-surface mb-2">Daftar sebagai Guru</h2>
-                        <p class="font-body-sm text-body-sm text-on-surface-variant text-center">
-                            Bagi dewan guru dan tenaga pendidik SMKN 5. Wajib menyertakan Nomor Induk Pegawai (NIP) dan mata pelajaran.
+                    <div class="relative z-20 mt-auto flex flex-col gap-6">
+                        <h1 class="font-display-lg text-display-lg text-on-primary leading-tight max-w-md">
+                            Perpustakaan Digital SMKN 5
+                        </h1>
+                        <p class="font-body-md text-body-md text-primary-fixed-dim max-w-sm">
+                            Jelajahi ribuan koleksi buku digital dan tingkatkan pengetahuan Anda bersama kami.
                         </p>
-                        <span class="mt-6 inline-flex items-center gap-2 font-label-caps text-label-caps font-bold text-primary-container uppercase tracking-wider group-hover:translate-x-1 transition-transform">
-                            Pilih Pendaftaran Guru
-                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-                        </span>
-                    </a>
+                        <!-- Decorative Stats -->
+                        <div class="flex gap-4 mt-8">
+                            <div class="flex flex-col gap-1">
+                                <span class="font-title-sm text-title-sm text-on-primary">15K+</span>
+                                <span class="font-label-caps text-label-caps text-primary-fixed-dim">Koleksi Buku</span>
+                            </div>
+                            <div class="w-[1px] h-12 bg-primary-fixed-dim/30"></div>
+                            <div class="flex flex-col gap-1">
+                                <span class="font-title-sm text-title-sm text-on-primary">2.4K</span>
+                                <span class="font-label-caps text-label-caps text-primary-fixed-dim">Anggota Aktif</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Decorative Circle -->
+                    <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-secondary/20 rounded-full blur-3xl z-0 pointer-events-none"></div>
                 </div>
 
-                <div class="pt-6 border-t border-outline-variant/40 text-center">
-                    <p class="font-body-sm text-body-sm text-on-surface-variant">
-                        Sudah memiliki akun terdaftar?
-                        <a href="{{ route('login') }}" class="text-secondary font-semibold hover:underline">
-                            Masuk di sini
-                        </a>
-                    </p>
+                <!-- Right Panel -->
+                <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-surface-container-lowest relative z-30">
+                    <div class="w-full max-w-xl">
+                        <!-- Header Section -->
+                        <div class="flex flex-col items-center mb-8 text-center">
+                            <h1 class="font-display-lg text-display-lg text-primary mb-2">Daftar sebagai Anggota</h1>
+                            <p class="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto">Buat akun untuk mengakses layanan perpustakaan secara penuh dan mulai menjelajahi koleksi kami.</p>
+                        </div>
+
+                        <!-- Choice Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <!-- Siswa Card -->
+                            <a href="{{ route('register.siswa') }}" class="group flex flex-col items-center p-6 rounded-xl bg-surface hover:bg-surface-container-low transition-all duration-200 hover:shadow-md flex flex-col items-center text-center h-full relative overflow-hidden border border-outline-variant/30 hover:border-secondary">
+                                <div class="w-16 h-16 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                    <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">school</span>
+                                </div>
+                                <h3 class="font-title-sm text-title-sm text-on-surface mb-2">Siswa</h3>
+                                <p class="font-body-sm text-body-sm text-on-surface-variant">Daftar sebagai siswa untuk meminjam buku dan akses materi pelajaran.</p>
+                            </a>
+
+                            <!-- Guru Card -->
+                            <a href="{{ route('register.guru') }}" class="group flex flex-col items-center p-6 rounded-xl bg-surface hover:bg-surface-container-low transition-all duration-200 hover:shadow-md flex flex-col items-center text-center h-full relative overflow-hidden border border-outline-variant/30 hover:border-primary-container">
+                                <div class="w-16 h-16 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                    <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">local_library</span>
+                                </div>
+                                <h3 class="font-title-sm text-title-sm text-on-surface mb-2">Guru</h3>
+                                <p class="font-body-sm text-body-sm text-on-surface-variant">Daftar sebagai guru untuk mengelola referensi dan merekomendasikan bahan bacaan.</p>
+                            </a>
+                        </div>
+
+                        <div class="flex justify-center items-center mt-8">
+                            <a class="font-body-sm text-body-sm text-secondary hover:text-on-secondary-fixed-variant transition-colors flex items-center gap-1" href="{{ route('login') }}">
+                                <span class="material-symbols-outlined text-[18px]">arrow_back</span> Kembali ke Masuk
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

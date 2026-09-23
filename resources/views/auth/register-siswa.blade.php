@@ -6,238 +6,225 @@
     <title>Form Pendaftaran Siswa - Library SMKN 5</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-surface antialiased font-body-md text-on-surface">
-    <main class="min-h-screen flex items-center justify-center p-4 sm:p-8">
-        <div class="flex flex-col w-full max-w-2xl mx-auto">
-            <div class="bg-surface-container-lowest rounded-2xl shadow-xl p-8 sm:p-12 border border-outline-variant/40">
-                <!-- Header -->
-                <div class="flex items-center gap-3 mb-6">
-                    <a href="{{ route('register') }}" class="p-2 rounded-lg hover:bg-surface-container-low text-on-surface-variant transition-colors" title="Kembali">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                    </a>
-                    <div>
-                        <span class="font-label-caps text-label-caps text-secondary uppercase tracking-wider font-bold">Registrasi Anggota</span>
-                        <h1 class="font-headline-md text-headline-md font-bold text-primary">Pendaftaran Siswa SMKN 5</h1>
+<body class="bg-surface antialiased font-body-md text-on-background">
+    <main class="min-h-screen flex items-center justify-center p-8">
+        <div class="flex flex-col w-full h-full min-h-[calc(100vh-4rem)]">
+            <div class="flex-1 flex w-full max-w-container-max mx-auto bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden relative">
+                <!-- Left Panel -->
+                <div class="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-12 overflow-hidden bg-primary-container text-on-primary-container">
+                    <!-- Background Image -->
+                    <div class="absolute inset-0 bg-cover bg-center z-0 mix-blend-overlay opacity-40" style="background-image: url('{{ asset('images/library/screen.png') }}');"></div>
+                    <!-- Scrim -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary-container via-primary-container/80 to-transparent z-10"></div>
+
+                    <div class="relative z-20 flex flex-col items-start gap-4">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-4xl text-tertiary-fixed" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+                            <span class="font-display-lg text-display-lg text-on-primary">Library SMKN 5</span>
+                        </div>
+                        <div class="h-1 w-12 bg-tertiary-fixed rounded-full"></div>
                     </div>
+
+                    <div class="relative z-20 mt-auto flex flex-col gap-6">
+                        <h1 class="font-display-lg text-display-lg text-on-primary leading-tight max-w-md">
+                            Perpustakaan Digital SMKN 5
+                        </h1>
+                        <p class="font-body-md text-body-md text-primary-fixed-dim max-w-sm">
+                            Jelajahi ribuan koleksi buku digital dan tingkatkan pengetahuan Anda bersama kami.
+                        </p>
+                        <!-- Decorative Stats -->
+                        <div class="flex gap-4 mt-8">
+                            <div class="flex flex-col gap-1">
+                                <span class="font-title-sm text-title-sm text-on-primary">15K+</span>
+                                <span class="font-label-caps text-label-caps text-primary-fixed-dim">Koleksi Buku</span>
+                            </div>
+                            <div class="w-[1px] h-12 bg-primary-fixed-dim/30"></div>
+                            <div class="flex flex-col gap-1">
+                                <span class="font-title-sm text-title-sm text-on-primary">2.4K</span>
+                                <span class="font-label-caps text-label-caps text-primary-fixed-dim">Anggota Aktif</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Decorative Circle -->
+                    <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-secondary/20 rounded-full blur-3xl z-0 pointer-events-none"></div>
                 </div>
 
-                <!-- Errors -->
-                @if ($errors->any())
-                    <div class="p-4 mb-6 bg-error-container/40 border border-error rounded-lg text-error text-body-sm space-y-1">
-                        @foreach ($errors->all() as $error)
-                            <p>{{ $error }}</p>
-                        @endforeach
+                <!-- Right Panel -->
+                <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-surface-container-lowest relative z-30">
+                    <div class="w-full max-w-xl z-10 relative overflow-hidden transition-all duration-500 ease-in-out" id="registration-container">
+                        <!-- Header Section -->
+                        <div class="flex flex-col items-center mb-8 text-center">
+                            <h1 class="font-display-lg text-display-lg text-primary mb-2">Form Pendaftaran Siswa</h1>
+                            <p class="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto">Lengkapi data diri Anda sebagai siswa SMKN 5</p>
+                        </div>
+
+                        <!-- Errors -->
+                        @if ($errors->any())
+                            <div class="p-4 mb-6 bg-error-container/40 border border-error rounded-lg text-error text-body-sm space-y-1">
+                                @foreach ($errors->all() as $error)
+                                    <p>{{ $error }}</p>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        <form class="space-y-6" method="POST" action="{{ route('register.siswa') }}">
+                            @csrf
+
+                            <div class="flex flex-col items-center justify-center mb-8">
+                                <div class="relative group cursor-pointer">
+                                    <div class="w-24 h-24 rounded-full bg-surface-container-high flex items-center justify-center border-2 border-dashed border-outline-variant group-hover:bg-primary-fixed transition-colors overflow-hidden">
+                                        <span class="material-symbols-outlined text-3xl text-on-surface-variant group-hover:text-primary">add_a_photo</span>
+                                    </div>
+                                    <div class="absolute bottom-0 right-0 bg-primary text-on-primary p-1.5 rounded-full shadow-md">
+                                        <span class="material-symbols-outlined text-[16px]">edit</span>
+                                    </div>
+                                    <input accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" type="file" name="profile_photo">
+                                </div>
+                                <p class="font-label-caps text-label-caps text-on-surface-variant mt-3 uppercase">Foto Profil</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Nama Lengkap -->
+                                <div class="space-y-2">
+                                    <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Nama Lengkap</label>
+                                    <div class="relative">
+                                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">person</span>
+                                        <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="Nama lengkap" required type="text" name="name" value="{{ old('name') }}">
+                                    </div>
+                                </div>
+
+                                <!-- Email -->
+                                <div class="space-y-2">
+                                    <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Email</label>
+                                    <div class="relative">
+                                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">mail</span>
+                                        <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="nama@email.com" required type="email" name="email" value="{{ old('email') }}">
+                                    </div>
+                                </div>
+
+                                <!-- Nomor Telepon -->
+                                <div class="space-y-2">
+                                    <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Nomor Telepon</label>
+                                    <div class="relative">
+                                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">call</span>
+                                        <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="08xxxxxxxxxx" required type="tel" name="phone" value="{{ old('phone') }}">
+                                    </div>
+                                </div>
+
+                                <!-- Username -->
+                                <div class="space-y-2">
+                                    <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Username</label>
+                                    <div class="relative">
+                                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">alternate_email</span>
+                                        <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="Username" required type="text" name="username" value="{{ old('username') }}">
+                                    </div>
+                                </div>
+
+                                <!-- NIS -->
+                                <div class="space-y-2">
+                                    <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">NIS</label>
+                                    <div class="relative">
+                                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">badge</span>
+                                        <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="Nomor Induk Siswa" required type="text" name="nis" value="{{ old('nis') }}">
+                                    </div>
+                                </div>
+
+                                <!-- Kelas -->
+                                <div class="space-y-2">
+                                    <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Kelas</label>
+                                    <div class="relative">
+                                        <select class="w-full pl-4 pr-10 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all appearance-none" required name="class">
+                                            <option disabled selected value="">Pilih Kelas</option>
+                                            <option value="XI RPL 1" @selected(old('class') == 'XI RPL 1')">XI RPL 1</option>
+                                            <option value="XI RPL 2" @selected(old('class') == 'XI RPL 2')">XI RPL 2</option>
+                                            <option value="XI TKJ 1" @selected(old('class') == 'XI TKJ 1')">XI TKJ 1</option>
+                                        </select>
+                                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+                                    </div>
+                                </div>
+
+                                <!-- Jurusan -->
+                                <div class="space-y-2 md:col-span-2">
+                                    <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Jurusan</label>
+                                    <div class="relative">
+                                        <select class="w-full pl-4 pr-10 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all appearance-none" required name="major">
+                                            <option disabled selected value="">Pilih Jurusan</option>
+                                            <option value="RPL" @selected(old('major') == 'RPL')">Rekayasa Perangkat Lunak</option>
+                                            <option value="TKJ" @selected(old('major') == 'TKJ')">Teknik Komputer & Jaringan</option>
+                                            <option value="MM" @selected(old('major') == 'MM')">Multimedia</option>
+                                        </select>
+                                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+                                    </div>
+                                </div>
+
+                                <!-- Password -->
+                                <div class="space-y-2">
+                                    <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Password</label>
+                                    <div class="relative">
+                                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">lock</span>
+                                        <input class="w-full pl-10 pr-12 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="•••••••••" required type="password" name="password">
+                                        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface btn-toggle-password focus:outline-none" type="button">
+                                            <span class="material-symbols-outlined">visibility_off</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Konfirmasi Password -->
+                                <div class="space-y-2">
+                                    <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Konfirmasi Password</label>
+                                    <div class="relative">
+                                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">lock_reset</span>
+                                        <input class="w-full pl-10 pr-12 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="•••••••••" required type="password" name="password_confirmation">
+                                        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface btn-toggle-password focus:outline-none" type="button">
+                                            <span class="material-symbols-outlined">visibility_off</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <label class="flex items-start gap-3 p-4 bg-surface rounded-lg cursor-pointer group">
+                                <div class="relative flex items-center justify-center mt-0.5">
+                                    <input class="peer appearance-none w-5 h-5 border-2 border-outline rounded bg-surface-container-lowest checked:bg-primary checked:border-primary transition-colors cursor-pointer" required type="checkbox" name="terms">
+                                    <span class="material-symbols-outlined absolute text-on-primary text-[16px] opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" style="font-variation-settings: 'FILL' 1;">check</span>
+                                </div>
+                                <span class="font-body-sm text-body-sm text-on-surface-variant">Saya menyetujui <a class="text-secondary hover:underline font-semibold" href="#">Syarat & Ketentuan</a>.</span>
+                            </label>
+
+                            <button class="w-full py-3.5 bg-primary text-on-primary rounded-lg font-body-md text-body-md font-semibold hover:bg-primary-container hover:shadow-lg transition-all flex justify-center items-center gap-2 group" type="submit">
+                                Daftar <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">person_add</span>
+                            </button>
+
+                            <div class="text-center mt-6">
+                                <a class="font-body-sm text-body-sm text-secondary hover:underline font-semibold" href="{{ route('login') }}">Sudah punya akun? Masuk</a>
+                            </div>
+                        </form>
                     </div>
-                @endif
-
-                <form method="POST" action="{{ route('register.siswa') }}" class="space-y-6">
-                    @csrf
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <!-- Nama Lengkap -->
-                        <div class="space-y-2 sm:col-span-2">
-                            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block font-semibold" for="name">
-                                Nama Lengkap Siswa
-                            </label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline">person</span>
-                                <input
-                                    id="name"
-                                    name="name"
-                                    type="text"
-                                    value="{{ old('name') }}"
-                                    class="w-full pl-11 pr-4 py-2.5 bg-surface-container-low/40 border border-outline-variant rounded-lg font-body-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none"
-                                    placeholder="Contoh: Muhammad Rizky"
-                                    required
-                                    autofocus
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Email -->
-                        <div class="space-y-2">
-                            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block font-semibold" for="email">
-                                Email
-                            </label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline">mail</span>
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    value="{{ old('email') }}"
-                                    class="w-full pl-11 pr-4 py-2.5 bg-surface-container-low/40 border border-outline-variant rounded-lg font-body-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none"
-                                    placeholder="nama@siswa.smkn5.sch.id"
-                                    required
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Username -->
-                        <div class="space-y-2">
-                            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block font-semibold" for="username">
-                                Username
-                            </label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline">alternate_email</span>
-                                <input
-                                    id="username"
-                                    name="username"
-                                    type="text"
-                                    value="{{ old('username') }}"
-                                    class="w-full pl-11 pr-4 py-2.5 bg-surface-container-low/40 border border-outline-variant rounded-lg font-body-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none"
-                                    placeholder="Username akun"
-                                    required
-                                >
-                            </div>
-                        </div>
-
-                        <!-- NIS -->
-                        <div class="space-y-2">
-                            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block font-semibold" for="nis">
-                                NIS (Nomor Induk Siswa)
-                            </label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline">badge</span>
-                                <input
-                                    id="nis"
-                                    name="nis"
-                                    type="text"
-                                    value="{{ old('nis') }}"
-                                    class="w-full pl-11 pr-4 py-2.5 bg-surface-container-low/40 border border-outline-variant rounded-lg font-body-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none"
-                                    placeholder="Contoh: 20231015"
-                                    required
-                                >
-                            </div>
-                        </div>
-
-                        <!-- No. Telepon -->
-                        <div class="space-y-2">
-                            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block font-semibold" for="phone">
-                                Nomor Telepon / WA
-                            </label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline">call</span>
-                                <input
-                                    id="phone"
-                                    name="phone"
-                                    type="tel"
-                                    value="{{ old('phone') }}"
-                                    class="w-full pl-11 pr-4 py-2.5 bg-surface-container-low/40 border border-outline-variant rounded-lg font-body-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none"
-                                    placeholder="08xxxxxxxxxx"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Kelas -->
-                        <div class="space-y-2">
-                            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block font-semibold" for="class">
-                                Kelas
-                            </label>
-                            <div class="relative">
-                                <select
-                                    id="class"
-                                    name="class"
-                                    class="w-full pl-4 pr-10 py-2.5 bg-surface-container-low/40 border border-outline-variant rounded-lg font-body-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none appearance-none"
-                                    required
-                                >
-                                    <option value="" disabled selected>Pilih Kelas</option>
-                                    <option value="X RPL 1" @selected(old('class') == 'X RPL 1')>X RPL 1</option>
-                                    <option value="X RPL 2" @selected(old('class') == 'X RPL 2')>X RPL 2</option>
-                                    <option value="XI RPL 1" @selected(old('class') == 'XI RPL 1')>XI RPL 1</option>
-                                    <option value="XI RPL 2" @selected(old('class') == 'XI RPL 2')>XI RPL 2</option>
-                                    <option value="XII RPL 1" @selected(old('class') == 'XII RPL 1')>XII RPL 1</option>
-                                    <option value="X TKJ 1" @selected(old('class') == 'X TKJ 1')>X TKJ 1</option>
-                                    <option value="XI TKJ 1" @selected(old('class') == 'XI TKJ 1')>XI TKJ 1</option>
-                                    <option value="XII TKJ 1" @selected(old('class') == 'XII TKJ 1')>XII TKJ 1</option>
-                                    <option value="X AKL 1" @selected(old('class') == 'X AKL 1')>X AKL 1</option>
-                                    <option value="XI AKL 1" @selected(old('class') == 'XI AKL 1')>XI AKL 1</option>
-                                    <option value="XII TSM" @selected(old('class') == 'XII TSM')>XII TSM</option>
-                                </select>
-                                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none">expand_more</span>
-                            </div>
-                        </div>
-
-                        <!-- Jurusan -->
-                        <div class="space-y-2">
-                            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block font-semibold" for="major">
-                                Jurusan / Kompetensi Keahlian
-                            </label>
-                            <div class="relative">
-                                <select
-                                    id="major"
-                                    name="major"
-                                    class="w-full pl-4 pr-10 py-2.5 bg-surface-container-low/40 border border-outline-variant rounded-lg font-body-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none appearance-none"
-                                    required
-                                >
-                                    <option value="" disabled selected>Pilih Jurusan</option>
-                                    <option value="RPL" @selected(old('major') == 'RPL')>Rekayasa Perangkat Lunak (RPL)</option>
-                                    <option value="TKJ" @selected(old('major') == 'TKJ')>Teknik Komputer & Jaringan (TKJ)</option>
-                                    <option value="AKL" @selected(old('major') == 'AKL')>Akuntansi & Keuangan Lembaga (AKL)</option>
-                                    <option value="TSM" @selected(old('major') == 'TSM')>Teknik Sepeda Motor (TSM)</option>
-                                    <option value="MM" @selected(old('major') == 'MM')>Multimedia (MM)</option>
-                                </select>
-                                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none">expand_more</span>
-                            </div>
-                        </div>
-
-                        <!-- Password -->
-                        <div class="space-y-2">
-                            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block font-semibold" for="password">
-                                Password
-                            </label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline">lock</span>
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    class="w-full pl-11 pr-4 py-2.5 bg-surface-container-low/40 border border-outline-variant rounded-lg font-body-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none"
-                                    placeholder="Min. 8 karakter"
-                                    required
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Konfirmasi Password -->
-                        <div class="space-y-2">
-                            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block font-semibold" for="password_confirmation">
-                                Konfirmasi Password
-                            </label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline">lock</span>
-                                <input
-                                    id="password_confirmation"
-                                    name="password_confirmation"
-                                    type="password"
-                                    class="w-full pl-11 pr-4 py-2.5 bg-surface-container-low/40 border border-outline-variant rounded-lg font-body-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none"
-                                    placeholder="Ulangi password"
-                                    required
-                                >
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button
-                        type="submit"
-                        class="w-full py-3 bg-secondary hover:bg-secondary/90 text-on-secondary rounded-lg font-title-sm text-title-sm font-semibold shadow-md transition-colors flex items-center justify-center gap-2 mt-4"
-                    >
-                        <span>Selesaikan Pendaftaran Siswa</span>
-                        <span class="material-symbols-outlined text-[20px]">how_to_reg</span>
-                    </button>
-                </form>
-
-                <div class="pt-6 border-t border-outline-variant/40 text-center mt-6">
-                    <p class="font-body-sm text-body-sm text-on-surface-variant">
-                        Sudah memiliki akun?
-                        <a href="{{ route('login') }}" class="text-secondary font-semibold hover:underline">
-                            Masuk di sini
-                        </a>
-                    </p>
                 </div>
             </div>
         </div>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const togglePasswordBtns = document.querySelectorAll('.btn-toggle-password');
+
+            // Password Toggle Visibility
+            togglePasswordBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const input = this.previousElementSibling;
+                    const icon = this.querySelector('span');
+
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.textContent = 'visibility';
+                    } else {
+                        input.type = 'password';
+                        icon.textContent = 'visibility_off';
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

@@ -20,7 +20,23 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register-select');
+        return view('auth.register');
+    }
+
+    /**
+     * Handle an incoming registration request (multi-step form).
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $role = $request->input('role');
+
+        if ($role === 'siswa') {
+            return $this->storeSiswa($request);
+        } elseif ($role === 'guru') {
+            return $this->storeGuru($request);
+        }
+
+        return back()->withErrors(['role' => 'Silakan pilih jenis keanggotaan terlebih dahulu.']);
     }
 
     /**
@@ -40,11 +56,14 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'username' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:'.User::class],
+            'phone' => ['required', 'string', 'max:20'],
             'nis' => ['required', 'string', 'max:30', 'unique:'.User::class],
             'class' => ['required', 'string', 'max:50'],
             'major' => ['required', 'string', 'max:50'],
-            'phone' => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'terms' => ['accepted'],
+        ], [
+            'terms.accepted' => 'Anda harus menyetujui Syarat & Ketentuan.',
         ]);
 
         $user = User::create([
@@ -87,10 +106,13 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'username' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:'.User::class],
+            'phone' => ['required', 'string', 'max:20'],
             'nip' => ['required', 'string', 'max:30', 'unique:'.User::class],
             'subject' => ['required', 'string', 'max:100'],
-            'phone' => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'terms' => ['accepted'],
+        ], [
+            'terms.accepted' => 'Anda harus menyetujui Syarat & Ketentuan.',
         ]);
 
         $user = User::create([
