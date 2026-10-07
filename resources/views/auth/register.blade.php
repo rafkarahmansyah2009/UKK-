@@ -52,7 +52,7 @@
 
                 <!-- Right Panel -->
                 <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-surface-container-lowest relative z-30">
-                    <div class="w-full max-w-xl z-10 relative overflow-hidden transition-all duration-500 ease-in-out" id="registration-container">
+                    <div class="w-full max-w-xl z-10 relative overflow-hidden transition-all duration-500 ease-in-out" id="registration-container" data-old-role="{{ old('role', '') }}" data-has-errors="{{ $errors->any() ? '1' : '0' }}">
                         <!-- Header Section -->
                         <div class="flex flex-col items-center mb-8 text-center" id="reg-header">
                             <h1 class="font-display-lg text-display-lg text-primary mb-2">Daftar sebagai Anggota</h1>
@@ -97,6 +97,13 @@
                                 </label>
                             </div>
 
+                            @error('role')
+                                <div class="p-4 mb-6 bg-error-container/40 border border-error rounded-lg text-error text-body-sm flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-[20px]">error</span>
+                                    <span>{{ $message }}</span>
+                                </div>
+                            @enderror
+
                             <div class="flex justify-between items-center mt-8">
                                 <a class="font-body-sm text-body-sm text-secondary hover:text-on-secondary-fixed-variant transition-colors flex items-center gap-1" href="{{ route('login') }}">
                                     <span class="material-symbols-outlined text-[18px]">arrow_back</span> Kembali ke Masuk
@@ -122,25 +129,38 @@
                             <!-- Errors -->
                             @if ($errors->any())
                                 <div class="p-4 mb-6 bg-error-container/40 border border-error rounded-lg text-error text-body-sm space-y-1">
-                                    @foreach ($errors->all() as $error)
-                                        <p>{{ $error }}</p>
-                                    @endforeach
+                                    <div class="flex items-center gap-2 font-semibold mb-1">
+                                        <span class="material-symbols-outlined text-[20px]">error</span>
+                                        <span>Pendaftaran belum berhasil:</span>
+                                    </div>
+                                    <ul class="list-disc list-inside space-y-1 pl-1">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
                                 </div>
                             @endif
 
-                            <form method="POST" action="{{ route('register.process') }}" class="space-y-6" id="registration-form">
+                            <form method="POST" action="{{ route('register.process') }}" enctype="multipart/form-data" class="space-y-6" id="registration-form">
                                 @csrf
                                 <input type="hidden" name="role" id="form-role" value="">
 
                                 <!-- Profile Photo Upload -->
-                                <div class="flex flex-col items-center justify-center p-6 bg-surface border-2 border-dashed border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors cursor-pointer group">
-                                    <div class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center mb-3 group-hover:bg-primary-fixed transition-colors">
-                                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">add_a_photo</span>
+                                <label for="reg_profile_photo" class="flex flex-col items-center justify-center p-6 bg-surface border-2 border-dashed border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors cursor-pointer group">
+                                    <div class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center mb-3 group-hover:bg-primary-fixed group-hover:border-secondary transition-all overflow-hidden relative shadow-sm">
+                                        <img id="reg-photo-preview" src="" alt="Preview" class="w-full h-full object-cover hidden">
+                                        <span id="reg-photo-placeholder" class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">add_a_photo</span>
                                     </div>
                                     <p class="font-body-sm text-body-sm text-on-surface font-semibold">Unggah Foto Profil</p>
-                                    <p class="font-label-caps text-label-caps text-on-surface-variant mt-1">PNG, JPG hingga 2MB</p>
-                                    <input accept="image/png, image/jpeg" class="hidden" type="file" name="profile_photo">
-                                </div>
+                                    <p class="font-label-caps text-label-caps text-on-surface-variant mt-1">PNG, JPG, WebP hingga 2MB</p>
+                                    <input
+                                        id="reg_profile_photo"
+                                        accept="image/png, image/jpeg, image/jpg, image/webp"
+                                        class="hidden"
+                                        type="file"
+                                        name="profile_photo"
+                                    >
+                                </label>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <!-- Common Fields -->
@@ -174,6 +194,7 @@
                                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">alternate_email</span>
                                             <input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="Pilih username" required type="text" name="username" value="{{ old('username') }}">
                                         </div>
+                                        <p class="font-label-caps text-xs text-on-surface-variant/70">Tanpa spasi (huruf, angka, _, atau -)</p>
                                     </div>
                                 </div>
 
@@ -188,18 +209,19 @@
                                         <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Password</label>
                                         <div class="relative">
                                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">lock</span>
-                                            <input class="w-full pl-10 pr-12 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="••••••••" required type="password" name="password">
+                                            <input class="w-full pl-10 pr-12 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="Minimal 8 karakter" required minlength="8" type="password" name="password">
                                             <button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface btn-toggle-password focus:outline-none" type="button">
                                                 <span class="material-symbols-outlined">visibility_off</span>
                                             </button>
                                         </div>
+                                        <p class="font-label-caps text-xs text-on-surface-variant/70">Minimal 8 karakter</p>
                                     </div>
 
                                     <div class="space-y-2">
                                         <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Konfirmasi Password</label>
                                         <div class="relative">
                                             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">lock_reset</span>
-                                            <input class="w-full pl-10 pr-12 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" required type="password" name="password_confirmation">
+                                            <input class="w-full pl-10 pr-12 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="Ulangi password" required minlength="8" type="password" name="password_confirmation">
                                             <button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface btn-toggle-password focus:outline-none" type="button">
                                                 <span class="material-symbols-outlined">visibility_off</span>
                                             </button>
@@ -241,78 +263,112 @@
         </div>
     </main>
 
+    <!-- Templates for dynamic fields (native HTML templates with Blade syntax) -->
+    <template id="tpl-siswa-fields">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="space-y-2 col-span-1 md:col-span-1">
+                <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">NIS</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">badge</span>
+                    <input type="number" required class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="Nomor Induk" name="nis" value="{{ old('nis') }}">
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Kelas</label>
+                <div class="relative">
+                    <select required class="w-full pl-4 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all appearance-none" name="class">
+                        <option value="" disabled @selected(!old('class'))>Pilih Kelas</option>
+                        <option value="X" @selected(old('class') == 'X')>Kelas X</option>
+                        <option value="XI" @selected(old('class') == 'XI')>Kelas XI</option>
+                        <option value="XII" @selected(old('class') == 'XII')>Kelas XII</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Jurusan</label>
+                <div class="relative">
+                    <select required class="w-full pl-4 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all appearance-none" name="major">
+                        <option value="" disabled @selected(!old('major'))>Pilih Jurusan</option>
+                        <option value="RPL" @selected(old('major') == 'RPL')>RPL</option>
+                        <option value="TKJ" @selected(old('major') == 'TKJ')>TKJ</option>
+                        <option value="MM" @selected(old('major') == 'MM')>Multimedia</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-guru-fields">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+                <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">NIP (Opsional)</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">badge</span>
+                    <input type="number" class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="Nomor Induk Pegawai" name="nip" value="{{ old('nip') }}">
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Mata Pelajaran</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">menu_book</span>
+                    <input type="text" required class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="Misal: Matematika" name="subject" value="{{ old('subject') }}">
+                </div>
+            </div>
+        </div>
+    </template>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const step1 = document.getElementById('step-1');
             const step2 = document.getElementById('step-2');
             const regHeader = document.getElementById('reg-header');
-            const successState = document.getElementById('success-state');
             const btnNext = document.getElementById('btn-next');
             const btnBack = document.getElementById('btn-back');
             const roleRadios = document.querySelectorAll('input[name="role"]');
             const dynamicFieldsContainer = document.getElementById('dynamic-fields');
             const roleSubtitle = document.getElementById('role-subtitle');
             const formRole = document.getElementById('form-role');
-            const form = document.getElementById('registration-form');
             const togglePasswordBtns = document.querySelectorAll('.btn-toggle-password');
+            const photoInput = document.getElementById('reg_profile_photo');
+            const regContainer = document.getElementById('registration-container');
 
             let selectedRole = null;
 
-            // Templates for dynamic fields
-            const siswaFields = `
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="space-y-2 col-span-1 md:col-span-1">
-                        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">NIS</label>
-                        <div class="relative">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">badge</span>
-                            <input type="number" required class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="Nomor Induk" name="nis" value="{{ old('nis') }}">
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Kelas</label>
-                        <div class="relative">
-                            <select required class="w-full pl-4 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all appearance-none" name="class">
-                                <option value="" disabled selected>Pilih Kelas</option>
-                                <option value="X" @selected(old('class') == 'X')>Kelas X</option>
-                                <option value="XI" @selected(old('class') == 'XI')>Kelas XI</option>
-                                <option value="XII" @selected(old('class') == 'XII')>Kelas XII</option>
-                            </select>
-                            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Jurusan</label>
-                        <div class="relative">
-                            <select required class="w-full pl-4 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all appearance-none" name="major">
-                                <option value="" disabled selected>Pilih Jurusan</option>
-                                <option value="RPL" @selected(old('major') == 'RPL')">RPL</option>
-                                <option value="TKJ" @selected(old('major') == 'TKJ')">TKJ</option>
-                                <option value="MM" @selected(old('major') == 'MM')">Multimedia</option>
-                            </select>
-                            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
-                        </div>
-                    </div>
-                </div>
-            `;
+            function getDynamicFields(role) {
+                const tpl = document.getElementById('tpl-' + role + '-fields');
+                return tpl ? tpl.innerHTML : '';
+            }
 
-            const guruFields = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">NIP (Opsional)</label>
-                        <div class="relative">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">badge</span>
-                            <input type="number" class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="Nomor Induk Pegawai" name="nip" value="{{ old('nip') }}">
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Mata Pelajaran</label>
-                        <div class="relative">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">menu_book</span>
-                            <input type="text" required class="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="Misal: Matematika" name="subject" value="{{ old('subject') }}">
-                        </div>
-                    </div>
-                </div>
-            `;
+            function activateStep2(role) {
+                selectedRole = role;
+                formRole.value = role;
+                dynamicFieldsContainer.innerHTML = getDynamicFields(role);
+                roleSubtitle.textContent = 'Mendaftar sebagai ' + role.charAt(0).toUpperCase() + role.slice(1);
+
+                const targetRadio = document.querySelector('input[name="role"][value="' + role + '"]');
+                if (targetRadio) {
+                    targetRadio.checked = true;
+                }
+
+                step1.classList.remove('opacity-100', 'block');
+                step1.classList.add('hidden', 'opacity-0');
+                regHeader.classList.add('hidden');
+
+                step2.classList.remove('hidden', 'opacity-0');
+                step2.classList.add('opacity-100');
+            }
+
+            // Auto-advance if returning with validation errors or old role
+            const oldRole = regContainer ? (regContainer.dataset.oldRole || '') : '';
+            const hasErrors = regContainer ? (regContainer.dataset.hasErrors === '1') : false;
+
+            if (oldRole) {
+                activateStep2(oldRole);
+            } else if (hasErrors) {
+                activateStep2('siswa');
+            }
 
             // Handle Role Selection
             roleRadios.forEach(radio => {
@@ -327,24 +383,19 @@
             btnNext.addEventListener('click', () => {
                 if (!selectedRole) return;
 
-                // Set form role value
                 formRole.value = selectedRole;
+                dynamicFieldsContainer.innerHTML = getDynamicFields(selectedRole);
+                roleSubtitle.textContent = 'Mendaftar sebagai ' + selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1);
 
-                // Populate dynamic fields
-                dynamicFieldsContainer.innerHTML = selectedRole === 'siswa' ? siswaFields : guruFields;
-                roleSubtitle.textContent = `Mendaftar sebagai ${selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}`;
-
-                // Transition
                 step1.classList.remove('opacity-100');
                 step1.classList.add('opacity-0');
 
                 setTimeout(() => {
                     step1.classList.add('hidden');
                     step1.classList.remove('block');
-                    regHeader.classList.add('hidden'); // Hide main header to save space
+                    regHeader.classList.add('hidden');
 
                     step2.classList.remove('hidden');
-                    // slight delay for rendering before opacity fade in
                     setTimeout(() => {
                         step2.classList.remove('opacity-0');
                         step2.classList.add('opacity-100');
@@ -387,11 +438,25 @@
                 });
             });
 
-            // Handle Form Submit - Let Laravel handle the submission
-            form.addEventListener('submit', (e) => {
-                // Form will submit normally to Laravel
-                // The success state will be handled by Laravel redirect
-            });
+            // Photo preview handler
+            if (photoInput) {
+                photoInput.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const img = document.getElementById('reg-photo-preview');
+                            const placeholder = document.getElementById('reg-photo-placeholder');
+                            if (img && placeholder) {
+                                img.src = e.target.result;
+                                img.classList.remove('hidden');
+                                placeholder.classList.add('hidden');
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
         });
     </script>
 </body>

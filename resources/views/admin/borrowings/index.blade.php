@@ -117,7 +117,7 @@
                                     </td>
                                     <td class="py-4 px-6">
                                         <div class="flex items-center gap-3">
-                                            @if ($b->book->cover_image)
+                                            @if ($b->book?->cover_image)
                                                 <img src="{{ $b->book->cover_image }}" alt="{{ $b->book->title }}" class="w-9 h-12 object-cover rounded shadow-sm">
                                             @else
                                                 <div class="w-9 h-12 bg-surface-container rounded flex items-center justify-center text-on-surface-variant">
@@ -125,8 +125,8 @@
                                                 </div>
                                             @endif
                                             <div class="truncate max-w-[260px]">
-                                                <span class="font-semibold text-on-surface block truncate" title="{{ $b->book->title }}">{{ $b->book->title }}</span>
-                                                <span class="text-xs text-on-surface-variant">{{ $b->book->author }}</span>
+                                                <span class="font-semibold text-on-surface block truncate" title="{{ $b->book?->title ?? 'Buku Dihapus' }}">{{ $b->book?->title ?? 'Buku Dihapus' }}</span>
+                                                <span class="text-xs text-on-surface-variant">{{ $b->book?->author ?? '-' }}</span>
                                             </div>
                                         </div>
                                     </td>
@@ -164,7 +164,7 @@
                                     </td>
                                     <td class="py-4 px-6 text-right">
                                         @if ($b->status !== 'returned')
-                                            <form method="POST" action="{{ route('admin.returns.process', $b) }}" class="inline" onsubmit="return confirm('Konfirmasi pengembalian buku {{ $b->book->title }} oleh {{ $b->user->name }}?');">
+                                            <form method="POST" action="{{ route('admin.returns.process', $b) }}" class="inline" onsubmit="return confirm('Konfirmasi pengembalian buku {{ $b->book?->title ?? 'ini' }} oleh {{ $b->user?->name ?? 'anggota' }}?');">
                                                 @csrf
                                                 <button type="submit" class="px-3 py-1.5 bg-secondary text-on-secondary hover:bg-secondary/90 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all ml-auto">
                                                     <span class="material-symbols-outlined text-[16px]">assignment_return</span>

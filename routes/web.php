@@ -45,8 +45,12 @@ Route::get('/dashboard', function () {
 */
 Route::prefix('admin')->as('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/chart-data', [AdminDashboardController::class, 'chartData'])->name('dashboard.chart-data');
 
     // Books
+    Route::get('books/export', [AdminBookController::class, 'export'])->name('books.export');
+    Route::post('books/{id}/restore', [AdminBookController::class, 'restore'])->name('books.restore');
+    Route::delete('books/{id}/force-delete', [AdminBookController::class, 'forceDelete'])->name('books.force-delete');
     Route::resource('books', AdminBookController::class);
 
     // Categories

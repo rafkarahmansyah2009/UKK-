@@ -78,7 +78,7 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category): RedirectResponse
     {
-        if ($category->books()->exists()) {
+        if ($category->books()->withTrashed()->exists()) {
             return back()->with('error', 'Kategori tidak dapat dihapus karena masih memiliki koleksi buku.');
         }
 

@@ -13,12 +13,54 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="mt-6 space-y-6">
         @csrf
         @method('patch')
 
+        <!-- Avatar Upload & Preview -->
+        <div x-data="{ photoName: null, photoPreview: null }">
+            <label class="block font-medium text-sm text-gray-700 dark:text-gray-300 mb-2">Foto Profil</label>
+            <div class="flex items-center gap-5">
+                <!-- Current or Preview Avatar -->
+                <div class="relative">
+                    <template x-if="!photoPreview">
+                        @if ($user->avatar)
+                            <img src="{{ $user->avatar }}" alt="{{ $user->name }}" class="w-20 h-20 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700 shadow-sm">
+                        @else
+                            <div class="w-20 h-20 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200 font-bold text-xl flex items-center justify-center border-2 border-gray-200 dark:border-gray-700 shadow-sm">
+                                {{ strtoupper(substr($user->name, 0, 2)) }}
+                            </div>
+                        @endif
+                    </template>
+                    <template x-if="photoPreview">
+                        <span class="block w-20 h-20 rounded-full bg-cover bg-no-repeat bg-center border-2 border-blue-500 shadow-sm"
+                              :style="'background-image: url(\'' + photoPreview + '\');'">
+                        </span>
+                    </template>
+                </div>
+
+                <div class="space-y-1">
+                    <input type="file" name="avatar" id="avatar" class="hidden" accept="image/*"
+                           x-ref="photo"
+                           x-on:change="
+                                photoName = $refs.photo.files[0].name;
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                    photoPreview = e.target.result;
+                                };
+                                reader.readAsDataURL($refs.photo.files[0]);
+                           ">
+                    <button type="button" x-on:click.prevent="$refs.photo.click()" class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none transition">
+                        Pilih Foto Baru
+                    </button>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Format: JPG, PNG, WEBP (Maksimal 2MB)</p>
+                    <x-input-error class="mt-1" :messages="$errors->get('avatar')" />
+                </div>
+            </div>
+        </div>
+
         <div>
-            <x-input-label for="name" :value="__('Name')" />
+            <x-input-label for="name" :value="__('Nama Lengkap')" />
             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
@@ -47,8 +89,14 @@
             @endif
         </div>
 
+        <div>
+            <x-input-label for="phone" :value="__('Nomor Telepon / WhatsApp')" />
+            <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="old('phone', $user->phone)" placeholder="08123456789" />
+            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+        </div>
+
         <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+            <x-primary-button>{{ __('Simpan Perubahan') }}</x-primary-button>
 
             @if (session('status') === 'profile-updated')
                 <p
@@ -56,8 +104,8 @@
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600 dark:text-gray-400"
-                >{{ __('Saved.') }}</p>
+                    class="text-sm text-green-600 dark:text-green-400 font-medium"
+                >{{ __('Profil berhasil diperbarui.') }}</p>
             @endif
         </div>
     </form>

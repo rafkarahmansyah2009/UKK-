@@ -8,8 +8,10 @@ use App\Models\Book;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BookController extends Controller
 {
@@ -19,6 +21,11 @@ class BookController extends Controller
     public function index(Request $request): View
     {
         $query = Book::with('category');
+
+        // Show trashed books if requested
+        if ($request->boolean('trashed')) {
+            $query->onlyTrashed();
+        }
 
         if ($request->filled('q')) {
             $searchTerm = $request->input('q');
@@ -37,6 +44,77 @@ class BookController extends Controller
         $categories = Category::all();
 
         return view('admin.books.index', compact('books', 'categories'));
+    }
+
+    /**
+     * Export books data to CSV.
+     */
+    public function export(Request $request): StreamedResponse
+    {
+        $query = Book::with('category');
+
+        if ($request->filled('q')) {
+            $searchTerm = $request->input('q');
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                    ->orWhere('author', 'like', "%{$searchTerm}%")
+                    ->orWhere('isbn', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        if ($request->filled('kategori')) {
+            $query->where('category_id', $request->input('kategori'));
+        }
+
+        $books = $query->latest()->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="data-buku-'.date('Y-m-d').'.csv"',
+        ];
+
+        $callback = function () use ($books) {
+            $file = fopen('php://output', 'w');
+
+            // Add BOM for UTF-8
+            fwrite($file, "\xEF\xBB\xBF");
+
+            // CSV Header
+            fputcsv($file, [
+                'ID',
+                'Judul',
+                'Penulis',
+                'Penerbit',
+                'Tahun Terbit',
+                'ISBN',
+                'Kategori',
+                'Stok Total',
+                'Stok Tersedia',
+                'Lokasi Rak',
+                'Status',
+            ]);
+
+            // CSV Data
+            foreach ($books as $book) {
+                fputcsv($file, [
+                    $book->id,
+                    $book->title,
+                    $book->author,
+                    $book->publisher,
+                    $book->publication_year,
+                    $book->isbn ?? '-',
+                    $book->category->name ?? 'Tanpa Kategori',
+                    $book->stock,
+                    $book->available_stock,
+                    $book->shelf_location ?? '-',
+                    $book->available_stock > 0 ? 'Tersedia' : 'Habis',
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return Response::stream($callback, 200, $headers);
     }
 
     /**
@@ -165,19 +243,51 @@ class BookController extends Controller
     }
 
     /**
-     * Remove the specified book.
+     * Remove the specified book (soft delete/deactivate).
      */
     public function destroy(Book $book): RedirectResponse
     {
         if ($book->borrowings()->where('status', 'borrowed')->exists()) {
-            return back()->with('error', 'Buku tidak dapat dihapus karena saat ini sedang dipinjam oleh anggota.');
+            return back()->with('error', 'Buku tidak dapat dinonaktifkan karena saat ini sedang dipinjam oleh anggota.');
         }
 
         $title = $book->title;
         $book->delete();
 
-        ActivityLog::record('book_deleted', "Buku '{$title}' dihapus dari sistem.");
+        ActivityLog::record('book_deactivated', "Buku '{$title}' dinonaktifkan dari sistem.");
 
-        return redirect()->route('admin.books.index')->with('success', 'Buku berhasil dihapus dari koleksi.');
+        return redirect()->route('admin.books.index')->with('success', 'Buku berhasil dinonaktifkan dari koleksi.');
+    }
+
+    /**
+     * Restore the specified soft-deleted book.
+     */
+    public function restore($id): RedirectResponse
+    {
+        $book = Book::withTrashed()->findOrFail($id);
+        $book->restore();
+
+        ActivityLog::record('book_restored', "Buku '{$book->title}' diaktifkan kembali ke sistem.");
+
+        return redirect()->route('admin.books.index')->with('success', 'Buku berhasil diaktifkan kembali.');
+    }
+
+    /**
+     * Permanently delete the specified book.
+     */
+    public function forceDelete($id): RedirectResponse
+    {
+        $book = Book::withTrashed()->findOrFail($id);
+
+        if ($book->borrowings()->where('status', 'borrowed')->exists()) {
+            return back()->with('error', 'Buku tidak dapat dihapus permanen karena saat ini sedang dipinjam oleh anggota.');
+        }
+
+        $title = $book->title;
+        $book->forceDelete();
+
+        ActivityLog::record('book_permanently_deleted', "Buku '{$title}' dihapus permanen dari sistem.");
+
+        return redirect()->route('admin.books.index')->with('success', 'Buku berhasil dihapus permanen dari sistem.');
     }
 }

@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -60,11 +61,18 @@ class RegisteredUserController extends Controller
             'nis' => ['required', 'string', 'max:30', 'unique:'.User::class],
             'class' => ['required', 'string', 'max:50'],
             'major' => ['required', 'string', 'max:50'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'terms' => ['accepted'],
         ], [
             'terms.accepted' => 'Anda harus menyetujui Syarat & Ketentuan.',
         ]);
+
+        $avatarUrl = null;
+        if ($request->hasFile('profile_photo')) {
+            $path = $request->file('profile_photo')->store('avatars', 'public');
+            $avatarUrl = Storage::url($path);
+        }
 
         $user = User::create([
             'name' => $request->name,
@@ -74,6 +82,7 @@ class RegisteredUserController extends Controller
             'class' => $request->class,
             'major' => $request->major,
             'phone' => $request->phone,
+            'avatar' => $avatarUrl,
             'role' => 'member',
             'member_type' => 'siswa',
             'status' => 'active',
@@ -107,21 +116,29 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'username' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:'.User::class],
             'phone' => ['required', 'string', 'max:20'],
-            'nip' => ['required', 'string', 'max:30', 'unique:'.User::class],
+            'nip' => ['nullable', 'string', 'max:30', 'unique:'.User::class],
             'subject' => ['required', 'string', 'max:100'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'terms' => ['accepted'],
         ], [
             'terms.accepted' => 'Anda harus menyetujui Syarat & Ketentuan.',
         ]);
 
+        $avatarUrl = null;
+        if ($request->hasFile('profile_photo')) {
+            $path = $request->file('profile_photo')->store('avatars', 'public');
+            $avatarUrl = Storage::url($path);
+        }
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'username' => $request->username,
-            'nip' => $request->nip,
+            'nip' => $request->nip ?: null,
             'subject' => $request->subject,
             'phone' => $request->phone,
+            'avatar' => $avatarUrl,
             'role' => 'member',
             'member_type' => 'guru',
             'status' => 'active',
@@ -132,7 +149,8 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        ActivityLog::record('member_registered', "Guru baru mendaftar: {$user->name} ({$user->nip})", $user->id);
+        $nipText = $user->nip ? " ({$user->nip})" : '';
+        ActivityLog::record('member_registered', "Guru baru mendaftar: {$user->name}{$nipText}", $user->id);
 
         return redirect(route('member.dashboard', absolute: false));
     }

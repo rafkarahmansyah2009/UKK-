@@ -55,32 +55,32 @@
 
         <!-- Main Chart Section -->
         <div class="bg-surface-container-lowest rounded-xl shadow-sm p-6 border border-outline-variant/30">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
                     <h3 class="font-headline-md text-headline-md text-on-surface font-bold">Grafik Tren Peminjaman</h3>
-                    <p class="text-body-sm text-on-surface-variant">Aktivitas peminjaman buku dalam 7 hari terakhir.</p>
+                    <p class="text-body-sm text-on-surface-variant">Statistik pemantauan sirkulasi peminjaman buku perpustakaan.</p>
                 </div>
-                <div class="px-3 py-1.5 bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm rounded-lg border border-outline-variant/40">
-                    7 Hari Terakhir
+                <div class="flex items-center gap-2">
+                    <label for="chartFilter" class="sr-only">Filter Periode</label>
+                    <div class="relative inline-block">
+                        <select
+                            id="chartFilter"
+                            class="appearance-none bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm text-sm rounded-lg px-3.5 py-2 pr-9 border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-[#1E293B]/20 transition-colors cursor-pointer"
+                        >
+                            <option value="7_days" selected>7 Hari Terakhir</option>
+                            <option value="30_days">30 Hari Terakhir</option>
+                            <option value="this_year">Tahun Ini</option>
+                        </select>
+                        <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-base pointer-events-none">
+                            expand_more
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <div class="h-48 w-full relative flex items-end justify-between gap-4 pt-6 px-4">
-                @php
-                    $maxVal = max(max($chartCounts), 5);
-                @endphp
-                @foreach ($chartCounts as $idx => $cnt)
-                    @php
-                        $heightPct = max(8, round(($cnt / $maxVal) * 100));
-                    @endphp
-                    <div class="flex-1 flex flex-col items-center gap-2 group">
-                        <span class="text-xs font-bold text-secondary opacity-0 group-hover:opacity-100 transition-opacity">{{ $cnt }} buku</span>
-                        <div class="w-full bg-surface-container-low rounded-t-lg overflow-hidden h-36 flex items-end">
-                            <div class="w-full bg-secondary hover:bg-secondary-container transition-all duration-300 rounded-t-lg" style="height: {{ $heightPct }}%;"></div>
-                        </div>
-                        <span class="font-label-caps text-label-caps text-on-surface-variant uppercase">{{ $dayLabels[$idx] ?? '' }}</span>
-                    </div>
-                @endforeach
+            <!-- Canvas Container -->
+            <div class="relative w-full h-64 sm:h-72">
+                <canvas id="borrowingChart"></canvas>
             </div>
         </div>
 
@@ -176,8 +176,12 @@
                                                 {{ $b->user->nis ?? $b->user->nip ?? $b->user->email }}
                                             </span>
                                         </td>
-                                        <td class="py-3 px-6 text-on-surface truncate max-w-[200px]" title="{{ $b->book->title }}">
-                                            {{ $b->book->title }}
+                                        <td class="py-3 px-6 text-on-surface truncate max-w-[200px]" title="{{ $b->book->title ?? 'Buku dihapus' }}">
+                                            @if ($b->book)
+                                                {{ $b->book->title }}
+                                            @else
+                                                <span class="text-error">Buku dihapus</span>
+                                            @endif
                                         </td>
                                         <td class="py-3 px-6 text-on-surface-variant">
                                             {{ $b->borrow_date->translatedFormat('d M Y') }}
@@ -222,4 +226,132 @@
             </div>
         </div>
     </div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('borrowingChart');
+            if (!ctx) return;
+
+            const chartContext = ctx.getContext('2d');
+
+            // Fungsi membuat gradient background lembut
+            function createNavyGradient(context) {
+                const gradient = context.createLinearGradient(0, 0, 0, 300);
+                gradient.addColorStop(0, 'rgba(30, 41, 59, 0.22)');
+                gradient.addColorStop(0.7, 'rgba(30, 41, 59, 0.04)');
+                gradient.addColorStop(1, 'rgba(30, 41, 59, 0.00)');
+                return gradient;
+            }
+
+            // Data inisial dari controller
+            const initialLabels = @json($dayLabels);
+            const initialData = @json($chartCounts);
+
+            const chartConfig = {
+                type: 'line',
+                data: {
+                    labels: initialLabels,
+                    datasets: [{
+                        label: 'Jumlah Peminjaman',
+                        data: initialData,
+                        borderColor: '#1E293B',
+                        borderWidth: 2.5,
+                        backgroundColor: createNavyGradient(chartContext),
+                        fill: true,
+                        tension: 0.4, // Smooth curved line
+                        pointBackgroundColor: '#1E293B',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#1E293B',
+                        pointHoverBorderColor: '#ffffff',
+                        pointHoverBorderWidth: 3,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#1E293B',
+                            titleColor: '#F8FAFC',
+                            bodyColor: '#F8FAFC',
+                            padding: 10,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.parsed.y} buku dipinjam`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#64748B',
+                                font: {
+                                    size: 11,
+                                    weight: '500'
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#64748B',
+                                precision: 0,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            const borrowingChart = new Chart(ctx, chartConfig);
+
+            // Filter Dropdown Handler (AJAX)
+            const filterDropdown = document.getElementById('chartFilter');
+            if (filterDropdown) {
+                filterDropdown.addEventListener('change', function () {
+                    const period = this.value;
+
+                    // Mengambil data baru via endpoint JSON
+                    fetch(`{{ route('admin.dashboard.chart-data') }}?period=${period}`)
+                        .then(response => {
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            return response.json();
+                        })
+                        .then(result => {
+                            borrowingChart.data.labels = result.labels;
+                            borrowingChart.data.datasets[0].data = result.data;
+                            borrowingChart.update('active');
+                        })
+                        .catch(err => {
+                            console.error('Gagal mengambil data chart:', err);
+                        });
+                });
+            }
+        });
+    </script>
 </x-layouts.admin>

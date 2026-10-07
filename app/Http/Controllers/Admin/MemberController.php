@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -68,7 +69,14 @@ class MemberController extends Controller
             'subject' => ['nullable', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'string', 'min:6'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
+
+        $avatarUrl = null;
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $avatarUrl = Storage::url($path);
+        }
 
         $member = User::create([
             'name' => $validated['name'],
@@ -82,6 +90,7 @@ class MemberController extends Controller
             'major' => $validated['major'] ?? null,
             'subject' => $validated['subject'] ?? null,
             'phone' => $validated['phone'] ?? null,
+            'avatar' => $avatarUrl,
             'status' => 'active',
             'password' => Hash::make($validated['password']),
         ]);
@@ -127,6 +136,7 @@ class MemberController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'status' => ['required', Rule::in(['active', 'inactive'])],
             'password' => ['nullable', 'string', 'min:6'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
         $data = [
@@ -142,6 +152,18 @@ class MemberController extends Controller
             'phone' => $validated['phone'] ?? null,
             'status' => $validated['status'],
         ];
+
+        if ($request->hasFile('avatar')) {
+            if ($member->avatar && str_starts_with($member->avatar, '/storage/')) {
+                $oldPath = str_replace('/storage/', '', $member->avatar);
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+            }
+
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $data['avatar'] = Storage::url($path);
+        }
 
         if (! empty($validated['password'])) {
             $data['password'] = Hash::make($validated['password']);

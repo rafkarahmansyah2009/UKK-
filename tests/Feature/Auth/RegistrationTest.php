@@ -29,6 +29,7 @@ test('new siswa can register', function () {
         'phone' => '08123456789',
         'password' => 'password123',
         'password_confirmation' => 'password123',
+        'terms' => '1',
     ]);
 
     $this->assertAuthenticated();
@@ -45,6 +46,7 @@ test('new guru can register', function () {
         'phone' => '08129876543',
         'password' => 'password123',
         'password_confirmation' => 'password123',
+        'terms' => '1',
     ]);
 
     $this->assertAuthenticated();

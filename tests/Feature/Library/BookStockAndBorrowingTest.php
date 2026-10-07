@@ -178,3 +178,76 @@ test('admin can settle fine and cannot double pay fine', function () {
     $doublePayResponse = $this->actingAs($admin)->post(route('admin.fines.pay', $fine));
     $doublePayResponse->assertSessionHas('error');
 });
+
+test('admin can deactivate (soft delete) a book without active borrowings and restore it', function () {
+    $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
+    $category = Category::factory()->create();
+    $book = Book::factory()->create(['category_id' => $category->id]);
+
+    // Deactivate book
+    $deleteResponse = $this->actingAs($admin)->delete(route('admin.books.destroy', $book));
+    $deleteResponse->assertRedirect(route('admin.books.index'));
+
+    expect(Book::count())->toBe(0)
+        ->and(Book::withTrashed()->count())->toBe(1);
+
+    // Restore book
+    $restoreResponse = $this->actingAs($admin)->post(route('admin.books.restore', $book->id));
+    $restoreResponse->assertRedirect(route('admin.books.index'));
+
+    expect(Book::count())->toBe(1);
+});
+
+test('admin cannot deactivate book that is currently borrowed', function () {
+    $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
+    $member = User::factory()->create(['role' => 'member', 'status' => 'active']);
+    $category = Category::factory()->create();
+    $book = Book::factory()->create(['category_id' => $category->id]);
+
+    Borrowing::create([
+        'transaction_code' => 'PJ-BORROWED-DEL',
+        'user_id' => $member->id,
+        'book_id' => $book->id,
+        'borrow_date' => Carbon::today(),
+        'due_date' => Carbon::today()->addDays(7),
+        'status' => 'borrowed',
+    ]);
+
+    $response = $this->actingAs($admin)->delete(route('admin.books.destroy', $book));
+    $response->assertSessionHas('error');
+
+    expect(Book::count())->toBe(1)
+        ->and($book->fresh()->deleted_at)->toBeNull();
+});
+
+test('deactivated book preserves relation in borrowings and returns history without crashing', function () {
+    $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
+    $member = User::factory()->create(['role' => 'member', 'status' => 'active']);
+    $category = Category::factory()->create();
+    $book = Book::factory()->create(['category_id' => $category->id]);
+
+    $borrowing = Borrowing::create([
+        'transaction_code' => 'PJ-HIST-001',
+        'user_id' => $member->id,
+        'book_id' => $book->id,
+        'borrow_date' => Carbon::today()->subDays(5),
+        'due_date' => Carbon::today()->addDays(2),
+        'return_date' => Carbon::today(),
+        'status' => 'returned',
+    ]);
+
+    // Soft delete the book
+    $book->delete();
+
+    // Verify relation resolves soft-deleted book
+    $borrowing->refresh();
+    expect($borrowing->book)->not->toBeNull()
+        ->and($borrowing->book->id)->toBe($book->id);
+
+    // Verify returns page and borrowings page render without error
+    $returnsPage = $this->actingAs($admin)->get(route('admin.returns.index'));
+    $returnsPage->assertOk();
+
+    $borrowingsPage = $this->actingAs($admin)->get(route('admin.borrowings.index'));
+    $borrowingsPage->assertOk();
+});

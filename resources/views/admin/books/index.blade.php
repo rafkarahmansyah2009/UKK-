@@ -11,6 +11,10 @@
                     </p>
                 </div>
                 <div class="flex items-center gap-3">
+                    <a href="{{ route('admin.books.export', request()->only(['q', 'kategori'])) }}" class="flex items-center gap-2 bg-transparent text-primary hover:bg-primary-container/10 px-4 py-2.5 rounded-lg transition-colors font-body-sm text-body-sm font-semibold border-none cursor-pointer">
+                        <span class="material-symbols-outlined text-[20px]">download</span>
+                        Ekspor Data
+                    </a>
                     <a href="{{ route('admin.books.create') }}" class="flex items-center gap-2 bg-primary text-on-primary hover:bg-primary/90 px-5 py-2.5 rounded-lg transition-colors shadow-md font-body-sm text-body-sm font-semibold">
                         <span class="material-symbols-outlined text-[20px]">add</span>
                         Tambah Buku
@@ -44,7 +48,11 @@
                         </select>
                         <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
                     </div>
-                    @if(request('q') || request('kategori'))
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" name="trashed" value="1" id="trashed" {{ request('trashed') ? 'checked' : '' }} onchange="this.form.submit()" class="w-4 h-4 rounded border-outline-variant text-secondary focus:ring-secondary">
+                        <label for="trashed" class="text-body-sm text-on-surface-variant cursor-pointer">Tampilkan yang Dinonaktifkan</label>
+                    </div>
+                    @if(request('q') || request('kategori') || request('trashed'))
                         <a href="{{ route('admin.books.index') }}" class="px-4 py-3 bg-surface-container hover:bg-surface-container-high rounded-xl text-on-surface-variant font-body-sm text-body-sm flex items-center justify-center">
                             Reset
                         </a>
@@ -113,7 +121,7 @@
                         </thead>
                         <tbody class="font-body-sm text-body-sm text-on-surface divide-y divide-outline-variant/30">
                             @forelse ($books as $book)
-                                <tr class="hover:bg-surface-container-low/50 transition-colors group">
+                                <tr class="hover:bg-surface-container-low/50 transition-colors group {{ $book->trashed() ? 'bg-error/5' : '' }}">
                                     <td class="py-4 px-6">
                                         @if ($book->cover_image)
                                             <img src="{{ $book->cover_image }}" alt="{{ $book->title }}" class="w-12 h-16 object-cover rounded shadow-sm">
@@ -125,9 +133,18 @@
                                     </td>
                                     <td class="py-4 px-6">
                                         <div class="flex flex-col">
-                                            <a href="{{ route('admin.books.show', $book) }}" class="font-semibold text-primary hover:text-secondary truncate max-w-[280px]" title="{{ $book->title }}">
-                                                {{ $book->title }}
-                                            </a>
+                                            <div class="flex items-center gap-2">
+                                                @if ($book->trashed())
+                                                    <span class="font-semibold text-error truncate max-w-[280px]" title="{{ $book->title }}">
+                                                        {{ $book->title }}
+                                                    </span>
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-error/10 text-error">Dinonaktifkan</span>
+                                                @else
+                                                    <a href="{{ route('admin.books.show', $book) }}" class="font-semibold text-primary hover:text-secondary truncate max-w-[280px]" title="{{ $book->title }}">
+                                                        {{ $book->title }}
+                                                    </a>
+                                                @endif
+                                            </div>
                                             <span class="text-on-surface-variant mt-0.5 text-[13px]">{{ $book->author }}</span>
                                             @if($book->shelf_location)
                                                 <span class="text-secondary text-[11px] font-medium mt-0.5">Rak: {{ $book->shelf_location }}</span>
@@ -150,7 +167,11 @@
                                         {{ $book->available_stock }}
                                     </td>
                                     <td class="py-4 px-6 text-center">
-                                        @if ($book->available_stock > 0)
+                                        @if ($book->trashed())
+                                            <span class="inline-flex items-center justify-center px-2.5 py-1 rounded text-[11px] font-bold uppercase tracking-wider bg-error-container text-error">
+                                                Dinonaktifkan
+                                            </span>
+                                        @elseif ($book->available_stock > 0)
                                             <span class="inline-flex items-center justify-center px-2.5 py-1 rounded text-[11px] font-bold uppercase tracking-wider bg-secondary-fixed/60 text-on-secondary-fixed-variant">
                                                 Tersedia
                                             </span>
@@ -162,19 +183,37 @@
                                     </td>
                                     <td class="py-4 px-6 text-right">
                                         <div class="flex items-center justify-end gap-1.5">
-                                            <a href="{{ route('admin.books.show', $book) }}" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-secondary transition-colors" title="Lihat Detail">
-                                                <span class="material-symbols-outlined text-[20px]">visibility</span>
-                                            </a>
-                                            <a href="{{ route('admin.books.edit', $book) }}" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-secondary transition-colors" title="Edit Buku">
-                                                <span class="material-symbols-outlined text-[20px]">edit</span>
-                                            </a>
-                                            <form method="POST" action="{{ route('admin.books.destroy', $book) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus buku ini dari katalog?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="p-2 rounded-lg text-error hover:bg-error-container/30 transition-colors" title="Hapus Buku">
-                                                    <span class="material-symbols-outlined text-[20px]">delete</span>
-                                                </button>
-                                            </form>
+                                            @if ($book->trashed())
+                                                <!-- Actions for trashed books -->
+                                                <form method="POST" action="{{ route('admin.books.restore', $book->id) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin mengaktifkan kembali buku ini?');">
+                                                    @csrf
+                                                    <button type="submit" class="p-1.5 rounded-md text-secondary hover:bg-secondary-container/20 transition-colors cursor-pointer border-none bg-transparent" title="Aktifkan Kembali">
+                                                        <span class="material-symbols-outlined text-[18px]">restore</span>
+                                                    </button>
+                                                </form>
+                                                <form method="POST" action="{{ route('admin.books.force-delete', $book->id) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus permanen buku ini? Tindakan ini tidak dapat dibatalkan!');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="p-1.5 rounded-md text-error hover:bg-error-container transition-colors cursor-pointer border-none bg-transparent" title="Hapus Permanen">
+                                                        <span class="material-symbols-outlined text-[18px]">delete_forever</span>
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <!-- Actions for active books -->
+                                                <a href="{{ route('admin.books.show', $book) }}" class="p-1.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-secondary transition-colors cursor-pointer border-none bg-transparent" title="Detail">
+                                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                                </a>
+                                                <a href="{{ route('admin.books.edit', $book) }}" class="p-1.5 rounded-md text-on-surface-variant hover:bg-surface-container hover:text-secondary transition-colors cursor-pointer border-none bg-transparent" title="Edit">
+                                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                                </a>
+                                                <form method="POST" action="{{ route('admin.books.destroy', $book) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menonaktifkan buku ini dari katalog?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="p-1.5 rounded-md text-error hover:bg-error-container transition-colors cursor-pointer border-none bg-transparent" title="Nonaktifkan">
+                                                        <span class="material-symbols-outlined text-[18px]">power_settings_new</span>
+                                                    </button>
+                                                </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

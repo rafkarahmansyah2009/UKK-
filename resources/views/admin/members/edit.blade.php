@@ -23,10 +23,49 @@
 
         <!-- Form Card -->
         <div class="max-w-3xl mx-auto w-full px-4 sm:px-8">
-            <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/50 p-6 sm:p-10" x-data="{ memberType: '{{ old('member_type', $member->member_type ?? 'siswa') }}' }">
-                <form method="POST" action="{{ route('admin.members.update', $member) }}" class="space-y-6">
+            <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/50 p-6 sm:p-10" x-data="{ memberType: '{{ old('member_type', $member->member_type ?? 'siswa') }}', photoPreview: null }">
+                <form method="POST" action="{{ route('admin.members.update', $member) }}" enctype="multipart/form-data" class="space-y-6">
                     @csrf
                     @method('PUT')
+
+                    <!-- Avatar Upload -->
+                    <div>
+                        <label class="block font-title-sm text-body-sm font-semibold text-on-surface mb-2">Foto Profil</label>
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <template x-if="!photoPreview">
+                                    @if ($member->avatar)
+                                        <img src="{{ $member->avatar }}" alt="{{ $member->name }}" class="w-16 h-16 rounded-full object-cover border-2 border-secondary shadow-sm">
+                                    @else
+                                        <div class="w-16 h-16 rounded-full bg-secondary-container/20 text-secondary font-bold flex items-center justify-center border border-outline-variant/50">
+                                            <span class="material-symbols-outlined text-2xl">person</span>
+                                        </div>
+                                    @endif
+                                </template>
+                                <template x-if="photoPreview">
+                                    <span class="block w-16 h-16 rounded-full bg-cover bg-no-repeat bg-center border-2 border-secondary shadow-sm"
+                                          :style="'background-image: url(\'' + photoPreview + '\');'">
+                                    </span>
+                                </template>
+                            </div>
+                            <div>
+                                <input type="file" name="avatar" id="avatar" class="hidden" accept="image/*"
+                                       x-ref="photo"
+                                       x-on:change="
+                                            const reader = new FileReader();
+                                            reader.onload = (e) => { photoPreview = e.target.result; };
+                                            reader.readAsDataURL($refs.photo.files[0]);
+                                       ">
+                                <button type="button" x-on:click.prevent="$refs.photo.click()" class="px-4 py-2 bg-surface-container hover:bg-surface-container-high rounded-xl text-on-surface-variant font-body-sm text-xs font-semibold transition-colors">
+                                    Ganti Foto
+                                </button>
+                                <p class="text-xs text-on-surface-variant mt-1">Format: JPG, PNG, WEBP (Maksimal 2MB)</p>
+                                @error('avatar')
+                                    <p class="text-error text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Status Banner -->
                     <div class="p-4 rounded-xl border flex items-center justify-between {{ $member->status === 'active' ? 'bg-secondary-container/10 border-secondary/30 text-secondary' : 'bg-error-container/20 border-error/30 text-error' }}">

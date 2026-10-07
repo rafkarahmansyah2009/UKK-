@@ -68,20 +68,42 @@
                             </div>
                         @endif
 
-                        <form class="space-y-6" method="POST" action="{{ route('register.siswa') }}">
+                        <form class="space-y-6" method="POST" action="{{ route('register.siswa') }}" enctype="multipart/form-data">
                             @csrf
 
                             <div class="flex flex-col items-center justify-center mb-8">
-                                <div class="relative group cursor-pointer">
-                                    <div class="w-24 h-24 rounded-full bg-surface-container-high flex items-center justify-center border-2 border-dashed border-outline-variant group-hover:bg-primary-fixed transition-colors overflow-hidden">
-                                        <span class="material-symbols-outlined text-3xl text-on-surface-variant group-hover:text-primary">add_a_photo</span>
+                                <label for="siswa_profile_photo" class="cursor-pointer relative group flex flex-col items-center">
+                                    <div class="w-24 h-24 rounded-full bg-surface-container-high flex items-center justify-center border-2 border-dashed border-outline-variant group-hover:bg-primary-fixed group-hover:border-secondary transition-all overflow-hidden relative shadow-sm">
+                                        <img id="siswa-photo-preview" src="" alt="Preview" class="w-full h-full object-cover hidden">
+                                        <span id="siswa-photo-placeholder" class="material-symbols-outlined text-3xl text-on-surface-variant group-hover:text-primary transition-colors">add_a_photo</span>
                                     </div>
-                                    <div class="absolute bottom-0 right-0 bg-primary text-on-primary p-1.5 rounded-full shadow-md">
-                                        <span class="material-symbols-outlined text-[16px]">edit</span>
+                                    <div class="absolute bottom-6 right-0 bg-primary text-on-primary p-1.5 rounded-full shadow-md group-hover:scale-110 transition-transform">
+                                        <span class="material-symbols-outlined text-[16px] block">photo_camera</span>
                                     </div>
-                                    <input accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" type="file" name="profile_photo">
-                                </div>
-                                <p class="font-label-caps text-label-caps text-on-surface-variant mt-3 uppercase">Foto Profil</p>
+                                    <input
+                                        id="siswa_profile_photo"
+                                        accept="image/png,image/jpeg,image/jpg,image/webp"
+                                        class="hidden"
+                                        type="file"
+                                        name="profile_photo"
+                                        onchange="
+                                            const file = this.files[0];
+                                            if (file) {
+                                                const reader = new FileReader();
+                                                reader.onload = (e) => {
+                                                    const img = document.getElementById('siswa-photo-preview');
+                                                    const placeholder = document.getElementById('siswa-photo-placeholder');
+                                                    img.src = e.target.result;
+                                                    img.classList.remove('hidden');
+                                                    placeholder.classList.add('hidden');
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        "
+                                    >
+                                </label>
+                                <p class="font-label-caps text-label-caps text-on-surface-variant mt-1 uppercase">Foto Profil</p>
+                                <p class="font-label-caps text-xs text-outline">JPG, PNG atau WebP (Maksimal 2MB)</p>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -163,11 +185,12 @@
                                     <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Password</label>
                                     <div class="relative">
                                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">lock</span>
-                                        <input class="w-full pl-10 pr-12 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="•••••••••" required type="password" name="password">
+                                        <input class="w-full pl-10 pr-12 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="Minimal 8 karakter" required minlength="8" type="password" name="password">
                                         <button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface btn-toggle-password focus:outline-none" type="button">
                                             <span class="material-symbols-outlined">visibility_off</span>
                                         </button>
                                     </div>
+                                    <p class="font-label-caps text-xs text-on-surface-variant/70">Minimal 8 karakter</p>
                                 </div>
 
                                 <!-- Konfirmasi Password -->
@@ -175,7 +198,7 @@
                                     <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Konfirmasi Password</label>
                                     <div class="relative">
                                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">lock_reset</span>
-                                        <input class="w-full pl-10 pr-12 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="•••••••••" required type="password" name="password_confirmation">
+                                        <input class="w-full pl-10 pr-12 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary transition-all placeholder:text-outline" placeholder="Ulangi password" required minlength="8" type="password" name="password_confirmation">
                                         <button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface btn-toggle-password focus:outline-none" type="button">
                                             <span class="material-symbols-outlined">visibility_off</span>
                                         </button>
