@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\Route;
 */
 Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/katalog', [PublicController::class, 'katalog'])->name('katalog');
+Route::get('/pengumuman', [PublicController::class, 'pengumuman'])->name('pengumuman');
+Route::get('/pengumuman/{slug}', [PublicController::class, 'pengumumanDetail'])->name('pengumuman.show');
 Route::get('/tentang', [PublicController::class, 'tentang'])->name('tentang');
 
 /*
