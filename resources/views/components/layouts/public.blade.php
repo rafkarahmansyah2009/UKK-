@@ -47,11 +47,8 @@
                 </a>
                 @endif
                 @else
-                <a href="{{ route('login') }}" class="px-4 py-2 font-body-sm text-body-sm font-semibold text-on-surface-variant hover:text-primary transition-colors">
+                <a href="{{ route('login') }}" class="px-5 py-2.5 bg-primary-container text-on-primary rounded-lg font-body-sm text-body-sm font-semibold hover:bg-primary-container/90 hover:-translate-y-0.5 hover:scale-[1.02] transition-all duration-300 ease-out shadow-sm">
                     Masuk
-                </a>
-                <a href="{{ route('register') }}" class="px-5 py-2.5 bg-primary-container text-on-primary rounded-lg font-body-sm text-body-sm font-semibold hover:bg-primary-container/90 hover:-translate-y-0.5 hover:scale-[1.02] transition-all duration-300 ease-out shadow-sm">
-                    Daftar
                 </a>
                 @endauth
             </div>
@@ -91,14 +88,9 @@
                     </a>
                     @endif
                 @else
-                    <div class="grid grid-cols-2 gap-2">
-                        <a href="{{ route('login') }}" class="w-full text-center px-4 py-2.5 border border-outline-variant text-on-surface rounded-lg font-body-sm font-semibold hover:bg-surface-container transition-colors">
-                            Masuk
-                        </a>
-                        <a href="{{ route('register') }}" class="w-full text-center px-4 py-2.5 bg-primary-container text-on-primary rounded-lg font-body-sm font-semibold hover:bg-primary-container/90 transition-colors">
-                            Daftar
-                        </a>
-                    </div>
+                    <a href="{{ route('login') }}" class="w-full block text-center px-4 py-2.5 bg-primary-container text-on-primary rounded-lg font-body-sm font-semibold hover:bg-primary-container/90 transition-colors">
+                        Masuk
+                    </a>
                 @endauth
             </div>
         </div>
@@ -128,7 +120,7 @@
                     <li><a href="{{ route('katalog') }}" class="hover:text-on-primary transition-colors">Katalog Buku</a></li>
                     <li><a href="{{ route('pengumuman') }}" class="hover:text-on-primary transition-colors">Pengumuman</a></li>
                     <li><a href="{{ route('tentang') }}" class="hover:text-on-primary transition-colors">Informasi Perpustakaan</a></li>
-                    <li><a href="{{ route('login') }}" class="hover:text-on-primary transition-colors">Masuk Akun</a></li>
+                    <!-- <li><a href="{{ route('login') }}" class="hover:text-on-primary transition-colors">Masuk Akun</a></li> -->
                 </ul>
             </div>
             <div class="space-y-3">
